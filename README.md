@@ -1,1 +1,1 @@
-# Filtro 21 Online con Filtro de Subtipo de Propiedad\n\nApp para filtrar datos por fechas, asesor, subtipo de propiedad y exportar con formato contable.
+# Filtro 21 Online Estético\n\nApp con mejoras visuales: iconos, separación de secciones, métricas y ancho completo.

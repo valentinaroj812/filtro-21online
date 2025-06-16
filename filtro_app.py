@@ -3,14 +3,18 @@ import streamlit as st
 import pandas as pd
 import io
 
+st.set_page_config(layout="wide")
+
 def clean_price(x):
     if pd.isnull(x):
         return 0.0
     return float(str(x).replace('$', '').replace(',', '').replace(' ', '').strip())
 
-st.title("📊 Filtro Avanzado de 21 Online")
+st.markdown("""
+<h1 style='text-align: center; color: #4CAF50;'>📊 Filtro Avanzado de 21 Online</h1>
+""", unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Sube tu archivo Excel con los datos:", type=["xlsx"])
+uploaded_file = st.file_uploader("📂 Sube tu archivo Excel con los datos:", type=["xlsx"])
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
@@ -22,17 +26,23 @@ if uploaded_file:
     if not pd.api.types.is_datetime64_any_dtype(df["Fecha Cierre"]):
         df["Fecha Cierre"] = pd.to_datetime(df["Fecha Cierre"], errors='coerce')
 
+    st.markdown("---")
+
     # Filtros avanzados
     min_date = df["Fecha Cierre"].min().date()
     max_date = df["Fecha Cierre"].max().date()
-    fecha_rango = st.date_input("Selecciona el rango de fechas de cierre:", value=(min_date, max_date))
-
-    asesores = pd.unique(df[["Asesor Captador", "Asesor Colocador"]].values.ravel('K'))
-    asesores = [a for a in asesores if pd.notnull(a)]
-    asesor_sel = st.selectbox("Selecciona un Asesor:", options=["Todos"] + asesores)
+    col1, col2 = st.columns(2)
+    with col1:
+        fecha_rango = st.date_input("📅 Selecciona el rango de fechas de cierre:", value=(min_date, max_date))
+    with col2:
+        asesores = pd.unique(df[["Asesor Captador", "Asesor Colocador"]].values.ravel('K'))
+        asesores = [a for a in asesores if pd.notnull(a)]
+        asesor_sel = st.selectbox("👤 Selecciona un Asesor:", options=["Todos"] + asesores)
 
     subtipos = pd.unique(df["Subtipo de Propiedad"].dropna())
-    subtipo_sel = st.selectbox("Selecciona el Subtipo de Propiedad:", options=["Todos"] + list(subtipos))
+    subtipo_sel = st.selectbox("🏠 Selecciona el Subtipo de Propiedad:", options=["Todos"] + list(subtipos))
+
+    st.markdown("---")
 
     # Aplicar filtros
     filtered_df = df.copy()
@@ -46,18 +56,19 @@ if uploaded_file:
     if subtipo_sel != "Todos":
         filtered_df = filtered_df[filtered_df["Subtipo de Propiedad"] == subtipo_sel]
 
-    # Eliminar la columna Empresa si existe
     if "Empresa" in filtered_df.columns:
         filtered_df = filtered_df.drop(columns=["Empresa"])
 
     st.dataframe(filtered_df)
 
-    # Mostrar sumas con formato accounting
+    st.markdown("---")
+
+    # Mostrar sumas en columnas
+    col3, col4 = st.columns(2)
     total_prom = filtered_df["Precio Promoción"].sum()
     total_cierre = filtered_df["Precio Cierre"].sum()
-
-    st.write(f"**Total Precio Promoción:** ${total_prom:,.2f}")
-    st.write(f"**Total Precio Cierre:** ${total_cierre:,.2f}")
+    col3.metric(label="💰 Total Precio Promoción", value=f"${total_prom:,.2f}")
+    col4.metric(label="💵 Total Precio Cierre", value=f"${total_cierre:,.2f}")
 
     # Exportación con formato contable en Excel
     import openpyxl
@@ -72,8 +83,12 @@ if uploaded_file:
     buffer.seek(0)
 
     st.download_button(
-        "Descargar reporte filtrado",
+        "📥 Descargar reporte filtrado",
         data=buffer,
         file_name="reporte_filtrado.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+    st.markdown("""
+    <p style='text-align: center; color: gray; font-size: small;'>Aplicación generada por 21 Online ©</p>
+    """, unsafe_allow_html=True)
