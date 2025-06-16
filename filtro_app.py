@@ -4,8 +4,17 @@ import pandas as pd
 import io
 import openpyxl
 import matplotlib.pyplot as plt
+from fpdf import FPDF
+import tempfile
 
 st.set_page_config(layout="wide")
+
+# --- Autenticación simple ---
+ACCESS_CODE = "21ONLINE2024"
+code_input = st.sidebar.text_input("🔑 Ingresa el código de acceso:", type="password")
+if code_input != ACCESS_CODE:
+    st.warning("🔒 Código de acceso requerido para usar la app.")
+    st.stop()
 
 def clean_price(x):
     if pd.isnull(x):
@@ -28,7 +37,7 @@ def load_and_merge(files):
         return pd.DataFrame()
 
 st.markdown("""
-<h1 style='text-align: center; color: #4CAF50;'>📊 21 Online - Análisis Visual</h1>
+<h1 style='text-align: center; color: #4CAF50;'>📊 21 Online - App Completa</h1>
 """, unsafe_allow_html=True)
 
 uploaded_files = st.file_uploader("📂 Sube uno o más archivos Excel:", type=["xlsx"], accept_multiple_files=True)
@@ -87,6 +96,10 @@ if uploaded_files:
             else:
                 rango_cierre = None
 
+            # Ordenamiento dinámico
+            sort_col = st.selectbox("Ordenar por:", options=df.columns.tolist())
+            sort_asc = st.radio("Orden:", options=["Ascendente", "Descendente"]) == "Ascendente"
+
         filtered_df = df.copy()
         if fecha_rango:
             start_date, end_date = fecha_rango
@@ -104,6 +117,8 @@ if uploaded_files:
             filtered_df = filtered_df[(filtered_df["Precio Cierre"] >= rango_cierre[0]) &
                                       (filtered_df["Precio Cierre"] <= rango_cierre[1])]
 
+        filtered_df = filtered_df.sort_values(by=sort_col, ascending=sort_asc)
+
         col1, col2 = st.columns(2)
         if "Precio Promoción" in filtered_df.columns:
             total_prom = filtered_df["Precio Promoción"].sum()
@@ -114,7 +129,7 @@ if uploaded_files:
 
         st.dataframe(filtered_df)
 
-        # Gráfico de barras
+        # Gráfico
         if "Asesor Captador" in filtered_df.columns:
             st.markdown("### 🔎 Ventas por Asesor Captador")
             resumen = filtered_df.groupby("Asesor Captador")["Precio Cierre"].sum().sort_values()
@@ -123,7 +138,7 @@ if uploaded_files:
             ax.set_xlabel("Precio Cierre Total")
             st.pyplot(fig)
 
-        # Exportación
+        # Excel export
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
@@ -136,12 +151,27 @@ if uploaded_files:
                     for cell in ws[col_letter][1:]:
                         cell.number_format = accounting_fmt
         buffer.seek(0)
+        st.download_button("📥 Descargar Excel filtrado", data=buffer, file_name="reporte_completo.xlsx",
+                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-        st.download_button(
-            "📥 Descargar Excel filtrado",
-            data=buffer,
-            file_name="reporte_visual.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        # PDF export
+        if st.button("📄 Generar PDF con gráfico"):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 10, "Reporte 21 Online", ln=True, align="C")
+            pdf.ln(10)
+            pdf.set_font("Arial", "", 12)
+            pdf.cell(0, 10, f"Total Precio Promoción: ${total_prom:,.2f}", ln=True)
+            pdf.cell(0, 10, f"Total Precio Cierre: ${total_cierre:,.2f}", ln=True)
+            # Guardar gráfico temporal
+            with tempfile.NamedTemporaryFile(suffix=".png") as tmpfile:
+                fig.savefig(tmpfile.name)
+                pdf.image(tmpfile.name, x=10, y=None, w=180)
+                pdf.ln(10)
+            pdf_output = buffer = io.BytesIO()
+            pdf.output(pdf_output)
+            st.download_button("📥 Descargar PDF", data=pdf_output.getvalue(),
+                               file_name="reporte_completo.pdf", mime="application/pdf")
 
 st.markdown("<p style='text-align: center; color: gray; font-size: small;'>Aplicación 21 Online ©</p>", unsafe_allow_html=True)
