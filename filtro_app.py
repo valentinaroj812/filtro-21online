@@ -7,7 +7,6 @@ from fpdf import FPDF
 
 st.set_page_config(layout="wide")
 
-# --- Autenticación simple ---
 ACCESS_CODE = "21ONLINE2024"
 code_input = st.sidebar.text_input("🔑 Ingresa el código de acceso:", type="password")
 if code_input != ACCESS_CODE:
@@ -118,13 +117,16 @@ if uploaded_files:
         if "Precio Promoción" in filtered_df.columns:
             total_prom = filtered_df["Precio Promoción"].sum()
             col1.metric(label="💰 Total Precio Promoción", value=f"${total_prom:,.2f}")
+        else:
+            total_prom = 0
         if "Precio Cierre" in filtered_df.columns:
             total_cierre = filtered_df["Precio Cierre"].sum()
             col2.metric(label="💵 Total Precio Cierre", value=f"${total_cierre:,.2f}")
+        else:
+            total_cierre = 0
 
         st.dataframe(filtered_df)
 
-        # Export Excel
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
@@ -140,7 +142,6 @@ if uploaded_files:
         st.download_button("📥 Descargar Excel filtrado", data=buffer, file_name="reporte_completo.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-        # Export PDF (solo totales)
         if st.button("📄 Generar PDF"):
             pdf = FPDF()
             pdf.add_page()
@@ -150,9 +151,8 @@ if uploaded_files:
             pdf.set_font("Arial", "", 12)
             pdf.cell(0, 10, f"Total Precio Promoción: ${total_prom:,.2f}", ln=True)
             pdf.cell(0, 10, f"Total Precio Cierre: ${total_cierre:,.2f}", ln=True)
-            pdf_output = buffer = io.BytesIO()
-            pdf.output(pdf_output)
-            st.download_button("📥 Descargar PDF", data=pdf_output.getvalue(),
+            pdf_output = pdf.output(dest='S').encode('latin1')
+            st.download_button("📥 Descargar PDF", data=pdf_output,
                                file_name="reporte_completo.pdf", mime="application/pdf")
 
 st.markdown("<p style='text-align: center; color: gray; font-size: small;'>Aplicación 21 Online ©</p>", unsafe_allow_html=True)
