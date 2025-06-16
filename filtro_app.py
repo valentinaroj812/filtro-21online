@@ -1,6 +1,7 @@
 
 import streamlit as st
 import pandas as pd
+import io
 
 def clean_price(x):
     if pd.isnull(x):
@@ -52,8 +53,14 @@ if uploaded_file:
     st.write(f"**Total Precio Cierre:** ${total_cierre:,.2f}")
 
     # Opción para descargar
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        filtered_df.to_excel(writer, index=False)
+    buffer.seek(0)
+
     st.download_button(
         "Descargar datos filtrados",
-        data=filtered_df.to_excel(index=False, engine='openpyxl'),
-        file_name="datos_filtrados.xlsx"
+        data=buffer,
+        file_name="datos_filtrados.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
