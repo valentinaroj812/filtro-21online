@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import io
+from openpyxl.styles import NamedStyle, numbers
 
 def clean_price(x):
     if pd.isnull(x):
@@ -47,17 +48,23 @@ if uploaded_file:
 
     st.dataframe(filtered_df)
 
-    # Mostrar sumas
+    # Mostrar sumas con formato accounting
     total_prom = filtered_df["Precio Promoción"].sum()
     total_cierre = filtered_df["Precio Cierre"].sum()
 
     st.write(f"**Total Precio Promoción:** ${total_prom:,.2f}")
     st.write(f"**Total Precio Cierre:** ${total_cierre:,.2f}")
 
-    # Exportación de datos filtrados
+    # Exportación con formato accounting en Excel
+    import openpyxl
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
+        ws = writer.book["Datos Filtrados"]
+        accounting_style = NamedStyle(name="accounting", number_format=numbers.FORMAT_ACCOUNTING_USD)
+        for col_letter in ['P', 'Q']:  # columnas 16 y 17 en Excel (Precio Promoción y Precio Cierre)
+            for cell in ws[col_letter][1:]:
+                cell.style = accounting_style
     buffer.seek(0)
 
     st.download_button(

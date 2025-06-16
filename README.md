@@ -1,3 +1,1 @@
-# Filtro 21 Online Simplificado
-
-App para filtrar datos por rango de fechas y asesor, y exportar el reporte.
+# Filtro 21 Online con Formato Accounting\n\nApp para filtrar datos y exportar con formato contable.
