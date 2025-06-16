@@ -1,1 +1,1 @@
-# Filtro 21 Online Estético\n\nApp con mejoras visuales: iconos, separación de secciones, métricas y ancho completo.
+# Filtro 21 Online Dinámico v2\n\nApp para analizar cualquier archivo Excel y activar filtros dinámicos según las columnas.
