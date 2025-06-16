@@ -1,1 +1,1 @@
-# Filtro 21 Online Universal\n\nApp que analiza cualquier archivo 21 Online, detecta encabezados automáticamente y aplica filtros dinámicos.
+# Filtro 21 Online - FASE 1\n\nApp con filtros avanzados, carga múltiple y exportación.
