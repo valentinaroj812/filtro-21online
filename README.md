@@ -1,1 +1,1 @@
-# Filtro 21 Online con Filtro de Operación\n\nApp para filtrar datos por fechas, asesor, tipo de operación y exportar con formato contable.
+# Filtro 21 Online con Filtro de Subtipo de Propiedad\n\nApp para filtrar datos por fechas, asesor, subtipo de propiedad y exportar con formato contable.

@@ -31,8 +31,8 @@ if uploaded_file:
     asesores = [a for a in asesores if pd.notnull(a)]
     asesor_sel = st.selectbox("Selecciona un Asesor:", options=["Todos"] + asesores)
 
-    operaciones = pd.unique(df["Tipo de Operación"].dropna())
-    operacion_sel = st.selectbox("Selecciona el Tipo de Operación:", options=["Todos"] + list(operaciones))
+    subtipos = pd.unique(df["Subtipo de Propiedad"].dropna())
+    subtipo_sel = st.selectbox("Selecciona el Subtipo de Propiedad:", options=["Todos"] + list(subtipos))
 
     # Aplicar filtros
     filtered_df = df.copy()
@@ -43,8 +43,8 @@ if uploaded_file:
     if asesor_sel != "Todos":
         filtered_df = filtered_df[(filtered_df["Asesor Captador"] == asesor_sel) |
                                   (filtered_df["Asesor Colocador"] == asesor_sel)]
-    if operacion_sel != "Todos":
-        filtered_df = filtered_df[filtered_df["Tipo de Operación"] == operacion_sel]
+    if subtipo_sel != "Todos":
+        filtered_df = filtered_df[filtered_df["Subtipo de Propiedad"] == subtipo_sel]
 
     # Eliminar la columna Empresa si existe
     if "Empresa" in filtered_df.columns:
