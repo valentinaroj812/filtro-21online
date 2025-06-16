@@ -8,7 +8,7 @@ def clean_price(x):
         return 0.0
     return float(str(x).replace('$', '').replace(',', '').replace(' ', '').strip())
 
-st.title("📊 Filtro Simplificado de 21 Online")
+st.title("📊 Filtro Avanzado de 21 Online")
 
 uploaded_file = st.file_uploader("Sube tu archivo Excel con los datos:", type=["xlsx"])
 
@@ -31,6 +31,9 @@ if uploaded_file:
     asesores = [a for a in asesores if pd.notnull(a)]
     asesor_sel = st.selectbox("Selecciona un Asesor:", options=["Todos"] + asesores)
 
+    operaciones = pd.unique(df["Tipo de Operación"].dropna())
+    operacion_sel = st.selectbox("Selecciona el Tipo de Operación:", options=["Todos"] + list(operaciones))
+
     # Aplicar filtros
     filtered_df = df.copy()
     if fecha_rango:
@@ -40,6 +43,8 @@ if uploaded_file:
     if asesor_sel != "Todos":
         filtered_df = filtered_df[(filtered_df["Asesor Captador"] == asesor_sel) |
                                   (filtered_df["Asesor Colocador"] == asesor_sel)]
+    if operacion_sel != "Todos":
+        filtered_df = filtered_df[filtered_df["Tipo de Operación"] == operacion_sel]
 
     # Eliminar la columna Empresa si existe
     if "Empresa" in filtered_df.columns:
@@ -60,9 +65,7 @@ if uploaded_file:
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
         ws = writer.book["Datos Filtrados"]
-        # Formato contable estándar
         accounting_fmt = "$#,##0.00_);[Red]($#,##0.00)"
-        # Aplicar formato a columnas de precios
         for col_letter in ['P', 'Q']:
             for cell in ws[col_letter][1:]:
                 cell.number_format = accounting_fmt

@@ -1,1 +1,1 @@
-# Filtro 21 Online con Formato Contable (Fixed)\n\nApp para filtrar y exportar datos con formato contable.
+# Filtro 21 Online con Filtro de Operación\n\nApp para filtrar datos por fechas, asesor, tipo de operación y exportar con formato contable.
