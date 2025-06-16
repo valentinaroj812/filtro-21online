@@ -2,22 +2,18 @@
 import streamlit as st
 import pandas as pd
 import io
-import matplotlib.pyplot as plt
 
 def clean_price(x):
     if pd.isnull(x):
         return 0.0
     return float(str(x).replace('$', '').replace(',', '').replace(' ', '').strip())
 
-st.title("📊 Filtro Avanzado y Reporte de 21 Online")
+st.title("📊 Filtro Simplificado de 21 Online")
 
 uploaded_file = st.file_uploader("Sube tu archivo Excel con los datos:", type=["xlsx"])
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-
-    if "Empresa" not in df.columns:
-        df["Empresa"] = "Desconocida"
 
     # Limpiar precios
     df["Precio Promoción"] = df["Precio Promoción"].apply(clean_price)
@@ -35,9 +31,6 @@ if uploaded_file:
     asesores = [a for a in asesores if pd.notnull(a)]
     asesor_sel = st.selectbox("Selecciona un Asesor:", options=["Todos"] + asesores)
 
-    empresas = pd.unique(df["Empresa"])
-    empresa_sel = st.selectbox("Selecciona una Empresa:", options=["Todos"] + list(empresas))
-
     # Aplicar filtros
     filtered_df = df.copy()
     if fecha_rango:
@@ -47,8 +40,10 @@ if uploaded_file:
     if asesor_sel != "Todos":
         filtered_df = filtered_df[(filtered_df["Asesor Captador"] == asesor_sel) |
                                   (filtered_df["Asesor Colocador"] == asesor_sel)]
-    if empresa_sel != "Todos":
-        filtered_df = filtered_df[filtered_df["Empresa"] == empresa_sel]
+
+    # Eliminar la columna Empresa si existe
+    if "Empresa" in filtered_df.columns:
+        filtered_df = filtered_df.drop(columns=["Empresa"])
 
     st.dataframe(filtered_df)
 
@@ -59,19 +54,10 @@ if uploaded_file:
     st.write(f"**Total Precio Promoción:** ${total_prom:,.2f}")
     st.write(f"**Total Precio Cierre:** ${total_cierre:,.2f}")
 
-    # Gráfico de barras por empresa
-    fig, ax = plt.subplots()
-    resumen = filtered_df.groupby("Empresa")["Precio Cierre"].sum().sort_values()
-    resumen.plot(kind="barh", ax=ax)
-    ax.set_xlabel("Precio Cierre Total")
-    ax.set_title("Ventas por Empresa")
-    st.pyplot(fig)
-
     # Exportación de datos filtrados
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
-        resumen.to_frame(name="Total Precio Cierre").to_excel(writer, sheet_name="Resumen Empresa")
     buffer.seek(0)
 
     st.download_button(

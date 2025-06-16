@@ -1,3 +1,3 @@
-# Filtro 21 Online Avanzado
+# Filtro 21 Online Simplificado
 
-App para filtrar, visualizar y exportar datos de propiedades con gráficos y reportes.
+App para filtrar datos por rango de fechas y asesor, y exportar el reporte.
