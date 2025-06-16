@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 import io
-from openpyxl.styles import NamedStyle, numbers
 
 def clean_price(x):
     if pd.isnull(x):
@@ -55,16 +54,18 @@ if uploaded_file:
     st.write(f"**Total Precio Promoción:** ${total_prom:,.2f}")
     st.write(f"**Total Precio Cierre:** ${total_cierre:,.2f}")
 
-    # Exportación con formato accounting en Excel
+    # Exportación con formato contable en Excel
     import openpyxl
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
         ws = writer.book["Datos Filtrados"]
-        accounting_style = NamedStyle(name="accounting", number_format=numbers.FORMAT_ACCOUNTING_USD)
-        for col_letter in ['P', 'Q']:  # columnas 16 y 17 en Excel (Precio Promoción y Precio Cierre)
+        # Formato contable estándar
+        accounting_fmt = "$#,##0.00_);[Red]($#,##0.00)"
+        # Aplicar formato a columnas de precios
+        for col_letter in ['P', 'Q']:
             for cell in ws[col_letter][1:]:
-                cell.style = accounting_style
+                cell.number_format = accounting_fmt
     buffer.seek(0)
 
     st.download_button(
