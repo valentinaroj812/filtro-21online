@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import io
 import openpyxl
+import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide")
 
@@ -26,7 +27,9 @@ def load_and_merge(files):
     else:
         return pd.DataFrame()
 
-st.markdown("<h1 style='text-align: center; color: #4CAF50;'>📊 21 Online - Filtros Avanzados</h1>", unsafe_allow_html=True)
+st.markdown("""
+<h1 style='text-align: center; color: #4CAF50;'>📊 21 Online - Análisis Visual</h1>
+""", unsafe_allow_html=True)
 
 uploaded_files = st.file_uploader("📂 Sube uno o más archivos Excel:", type=["xlsx"], accept_multiple_files=True)
 
@@ -101,8 +104,26 @@ if uploaded_files:
             filtered_df = filtered_df[(filtered_df["Precio Cierre"] >= rango_cierre[0]) &
                                       (filtered_df["Precio Cierre"] <= rango_cierre[1])]
 
+        col1, col2 = st.columns(2)
+        if "Precio Promoción" in filtered_df.columns:
+            total_prom = filtered_df["Precio Promoción"].sum()
+            col1.metric(label="💰 Total Precio Promoción", value=f"${total_prom:,.2f}")
+        if "Precio Cierre" in filtered_df.columns:
+            total_cierre = filtered_df["Precio Cierre"].sum()
+            col2.metric(label="💵 Total Precio Cierre", value=f"${total_cierre:,.2f}")
+
         st.dataframe(filtered_df)
 
+        # Gráfico de barras
+        if "Asesor Captador" in filtered_df.columns:
+            st.markdown("### 🔎 Ventas por Asesor Captador")
+            resumen = filtered_df.groupby("Asesor Captador")["Precio Cierre"].sum().sort_values()
+            fig, ax = plt.subplots()
+            resumen.plot(kind="barh", ax=ax)
+            ax.set_xlabel("Precio Cierre Total")
+            st.pyplot(fig)
+
+        # Exportación
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
@@ -119,6 +140,8 @@ if uploaded_files:
         st.download_button(
             "📥 Descargar Excel filtrado",
             data=buffer,
-            file_name="reporte_filtrado.xlsx",
+            file_name="reporte_visual.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
+st.markdown("<p style='text-align: center; color: gray; font-size: small;'>Aplicación 21 Online ©</p>", unsafe_allow_html=True)

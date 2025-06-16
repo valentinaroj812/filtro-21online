@@ -1,1 +1,1 @@
-# Filtro 21 Online - FASE 1\n\nApp con filtros avanzados, carga múltiple y exportación.
+# Filtro 21 Online - FASE 2\n\nApp con visualización, gráficos y diseño mejorado.
