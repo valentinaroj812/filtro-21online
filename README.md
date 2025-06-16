@@ -1,3 +1,3 @@
-# Filtro 21 Online
+# Filtro 21 Online Avanzado
 
-App para filtrar datos de propiedades.
+App para filtrar, visualizar y exportar datos de propiedades con gráficos y reportes.
