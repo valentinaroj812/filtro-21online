@@ -18,7 +18,8 @@ st.markdown("""
 uploaded_file = st.file_uploader("📂 Sube tu archivo Excel para analizar:", type=["xlsx"])
 
 if uploaded_file:
-    df = pd.read_excel(uploaded_file)
+    # Usamos header=1 para tomar la segunda fila como encabezado
+    df = pd.read_excel(uploaded_file, header=1)
 
     st.markdown("---")
 
