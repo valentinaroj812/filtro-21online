@@ -3,9 +3,7 @@ import streamlit as st
 import pandas as pd
 import io
 import openpyxl
-import matplotlib.pyplot as plt
 from fpdf import FPDF
-import tempfile
 
 st.set_page_config(layout="wide")
 
@@ -36,9 +34,7 @@ def load_and_merge(files):
     else:
         return pd.DataFrame()
 
-st.markdown("""
-<h1 style='text-align: center; color: #4CAF50;'>📊 21 Online - App Completa</h1>
-""", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #4CAF50;'>📊 21 Online - App Completa sin Gráfico</h1>", unsafe_allow_html=True)
 
 uploaded_files = st.file_uploader("📂 Sube uno o más archivos Excel:", type=["xlsx"], accept_multiple_files=True)
 
@@ -96,7 +92,6 @@ if uploaded_files:
             else:
                 rango_cierre = None
 
-            # Ordenamiento dinámico
             sort_col = st.selectbox("Ordenar por:", options=df.columns.tolist())
             sort_asc = st.radio("Orden:", options=["Ascendente", "Descendente"]) == "Ascendente"
 
@@ -129,16 +124,7 @@ if uploaded_files:
 
         st.dataframe(filtered_df)
 
-        # Gráfico
-        if "Asesor Captador" in filtered_df.columns:
-            st.markdown("### 🔎 Ventas por Asesor Captador")
-            resumen = filtered_df.groupby("Asesor Captador")["Precio Cierre"].sum().sort_values()
-            fig, ax = plt.subplots()
-            resumen.plot(kind="barh", ax=ax)
-            ax.set_xlabel("Precio Cierre Total")
-            st.pyplot(fig)
-
-        # Excel export
+        # Export Excel
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             filtered_df.to_excel(writer, index=False, sheet_name="Datos Filtrados")
@@ -154,8 +140,8 @@ if uploaded_files:
         st.download_button("📥 Descargar Excel filtrado", data=buffer, file_name="reporte_completo.xlsx",
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-        # PDF export
-        if st.button("📄 Generar PDF con gráfico"):
+        # Export PDF (solo totales)
+        if st.button("📄 Generar PDF"):
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("Arial", "B", 16)
@@ -164,11 +150,6 @@ if uploaded_files:
             pdf.set_font("Arial", "", 12)
             pdf.cell(0, 10, f"Total Precio Promoción: ${total_prom:,.2f}", ln=True)
             pdf.cell(0, 10, f"Total Precio Cierre: ${total_cierre:,.2f}", ln=True)
-            # Guardar gráfico temporal
-            with tempfile.NamedTemporaryFile(suffix=".png") as tmpfile:
-                fig.savefig(tmpfile.name)
-                pdf.image(tmpfile.name, x=10, y=None, w=180)
-                pdf.ln(10)
             pdf_output = buffer = io.BytesIO()
             pdf.output(pdf_output)
             st.download_button("📥 Descargar PDF", data=pdf_output.getvalue(),

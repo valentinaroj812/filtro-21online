@@ -1,1 +1,1 @@
-# Filtro 21 Online - FASE 3\n\nApp completa con filtros avanzados, ordenamiento, exportación a Excel y PDF, y autenticación.
+# Filtro 21 Online - FASE 3 sin Gráfico\n\nApp completa con filtros, ordenamiento, exportación a Excel y PDF, y autenticación.
