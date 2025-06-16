@@ -11,15 +11,22 @@ def clean_price(x):
         return 0.0
     return float(str(x).replace('$', '').replace(',', '').replace(' ', '').strip())
 
+def load_excel_dynamic(file):
+    # Intentar con header=0
+    df = pd.read_excel(file, header=0)
+    if "Fecha Cierre" not in df.columns and "Asesor Captador" not in df.columns:
+        # Intentar con header=1 si no se detectan columnas clave
+        df = pd.read_excel(file, header=1)
+    return df
+
 st.markdown("""
-<h1 style='text-align: center; color: #4CAF50;'>📊 Analizador de Archivos Excel</h1>
+<h1 style='text-align: center; color: #4CAF50;'>📊 Analizador Universal de Archivos 21 Online</h1>
 """, unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("📂 Sube tu archivo Excel para analizar:", type=["xlsx"])
 
 if uploaded_file:
-    # Usamos header=1 para tomar la segunda fila como encabezado
-    df = pd.read_excel(uploaded_file, header=1)
+    df = load_excel_dynamic(uploaded_file)
 
     st.markdown("---")
 

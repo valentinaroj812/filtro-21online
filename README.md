@@ -1,1 +1,1 @@
-# Filtro 21 Online Dinámico v2\n\nApp para analizar cualquier archivo Excel y activar filtros dinámicos según las columnas.
+# Filtro 21 Online Universal\n\nApp que analiza cualquier archivo 21 Online, detecta encabezados automáticamente y aplica filtros dinámicos.
