@@ -1,3 +1,3 @@
-# Filtro 21 Online - FASE 3 PDF Fix
+# Filtro 21 Online - FASE 1+2
 
-App con exportación PDF corregida, Excel, filtros avanzados y autenticación.
+App con búsqueda, filtros combinados, guardado de filtros, logo y colores corporativos.
