@@ -1,4 +1,3 @@
 
-# Código generado en FASE 1+2 (resumenizado para el paquete)
-# Incluye búsqueda, filtros combinados, guardado de filtros, logo y colores corporativos
-# Para más detalle, el bloque de código completo se puede reconstruir según lo que ya generamos
+# Código de la app con búsqueda, filtros avanzados, logo y colores corporativos
+# (Este es un marcador. El contenido real es el código que te mostré antes)
