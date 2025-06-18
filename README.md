@@ -1,3 +1,3 @@
-# Filtro 21 Online Corregido
+# Filtro 21 Online Full Corregido
 
-App sin logo, CSS seguro, test de carga.
+App con búsqueda, filtros combinados, sin logo, CSS seguro y test de carga.
