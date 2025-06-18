@@ -1,3 +1,3 @@
-# Filtro 21 Online Pro
+# Filtro 21 Online Corregido
 
-App con búsqueda, filtros combinados, guardado de filtros, logo y colores corporativos.
+App sin logo, CSS seguro, test de carga.
