@@ -23,10 +23,14 @@ def load_and_merge(files):
     dfs = []
     for file in files:
         try:
-            df = pd.read_excel(file, header=0)
-            if "Fecha Cierre" not in df.columns:
-                df = pd.read_excel(file, header=1)
-            dfs.append(df)
+            temp = pd.read_excel(file, header=None)
+            # Encuentra fila que contiene "Fecha Cierre" y úsala como header
+            header_row = temp[temp.apply(lambda row: row.astype(str).str.contains("Fecha Cierre").any(), axis=1)].index
+            if not header_row.empty:
+                df = pd.read_excel(file, header=header_row[0])
+                dfs.append(df)
+            else:
+                st.error(f"⚠ No se encontró encabezado en el archivo: {file.name}")
         except Exception as e:
             st.error(f"⚠ No se pudo leer el archivo: {file.name}")
     if dfs:
@@ -44,10 +48,11 @@ if uploaded_files:
     if df.empty:
         st.warning("⚠ No se pudo procesar ningún archivo válido.")
     else:
-        if "Precio Promoción" in df.columns:
-            df["Precio Promoción"] = df["Precio Promoción"].apply(clean_price)
-        if "Precio Cierre" in df.columns:
-            df["Precio Cierre"] = df["Precio Cierre"].apply(clean_price)
+        # Limpieza
+        for col in ["Precio Promoción", "Precio Cierre"]:
+            if col in df.columns:
+                df[col] = df[col].apply(clean_price)
+
         if "Fecha Cierre" in df.columns:
             df["Fecha Cierre"] = pd.to_datetime(df["Fecha Cierre"], errors='coerce')
 
@@ -101,7 +106,6 @@ if uploaded_files:
 
         st.dataframe(filtered_df)
 
-        # Mostrar totales si las columnas existen
         st.markdown("### Totales")
         col1, col2 = st.columns(2)
         with col1:

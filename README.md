@@ -1,3 +1,3 @@
-# Filtro con Totales
+# Filtro compatible
 
-Versión que muestra totales de Precio Cierre y Precio Promoción.
+Compatible con múltiples estructuras de archivos Excel.
