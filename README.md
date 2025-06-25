@@ -1,3 +1,3 @@
-# Filtro 21 Online Full Corregido
+# Filtro 21 Online con Totales
 
-App con búsqueda, filtros combinados, sin logo, CSS seguro y test de carga.
+Incluye suma automática de Precio Cierre y Precio Promoción.
