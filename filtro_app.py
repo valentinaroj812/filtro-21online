@@ -26,8 +26,7 @@ def normalize_column_names(df):
         col.strip().lower()
         .replace("á", "a").replace("é", "e").replace("í", "i")
         .replace("ó", "o").replace("ú", "u")
-        .replace("  ", " ").replace("
-", " ")
+        .replace("  ", " ").replace("\n", " ")
         for col in df.columns
     ]
     return df
