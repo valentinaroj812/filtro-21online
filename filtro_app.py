@@ -4,7 +4,6 @@ import pandas as pd
 import openpyxl
 
 st.set_page_config(layout="wide", page_title="21 Online App", page_icon="📊")
-
 st.markdown("<style>h1, h2, h3 {color: #B4975A;}</style>", unsafe_allow_html=True)
 st.markdown("<h1 style='text-align: center;'>📊 21 Online - App Pro</h1>", unsafe_allow_html=True)
 
@@ -22,48 +21,50 @@ def clean_price(x):
     except:
         return 0.0
 
-def find_column(columns, name_keywords):
-    for col in columns:
-        if any(keyword.lower() in col.lower() for keyword in name_keywords):
-            return col
-    return None
+def normalize_column_names(df):
+    df.columns = [
+        col.strip().lower()
+        .replace("á", "a").replace("é", "e").replace("í", "i")
+        .replace("ó", "o").replace("ú", "u")
+        .replace("  ", " ").replace("
+", " ")
+        for col in df.columns
+    ]
+    return df
 
-def load_and_merge(files):
-    dfs = []
-    for file in files:
+def load_excel_with_header_guess(file):
+    for header_row in [0, 1, 2]:
         try:
-            df = pd.read_excel(file, header=0)
-            dfs.append(df)
+            df = pd.read_excel(file, header=header_row)
+            df = normalize_column_names(df)
+            if "precio cierre" in df.columns or "precio promocion" in df.columns:
+                return df
         except:
-            st.error(f"⚠ No se pudo leer el archivo: {file.name}")
-    if dfs:
-        return pd.concat(dfs, ignore_index=True)
-    else:
-        return pd.DataFrame()
+            continue
+    return pd.DataFrame()
 
 uploaded_files = st.file_uploader("📂 Sube uno o más archivos Excel:", type=["xlsx"], accept_multiple_files=True)
 
 if uploaded_files:
-    df = load_and_merge(uploaded_files)
+    dfs = [load_excel_with_header_guess(f) for f in uploaded_files]
+    df = pd.concat(dfs, ignore_index=True)
 
     if df.empty:
-        st.warning("⚠ No se pudo procesar ningún archivo válido.")
+        st.warning("⚠ No se encontró información válida en los archivos.")
     else:
-        col_prom = find_column(df.columns, ["promocion"])
-        col_cierre = find_column(df.columns, ["cierre"])
-        if col_prom:
-            df[col_prom] = df[col_prom].apply(clean_price)
-        if col_cierre:
-            df[col_cierre] = df[col_cierre].apply(clean_price)
+        if "precio promocion" in df.columns:
+            df["precio promocion"] = df["precio promocion"].apply(clean_price)
+        if "precio cierre" in df.columns:
+            df["precio cierre"] = df["precio cierre"].apply(clean_price)
 
         with st.sidebar:
-            st.header("Filtros avanzados")
+            st.header("Filtros")
             search = st.text_input("🔎 Buscar palabra clave (dirección, código, cliente):").strip()
 
         filtered_df = df.copy()
 
         if search:
-            search_cols = ["Dirección", "Código", "Cliente"]
+            search_cols = ["direccion", "codigo", "cliente"]
             mask = pd.Series(False, index=filtered_df.index)
             for col in search_cols:
                 if col in filtered_df.columns:
@@ -72,11 +73,14 @@ if uploaded_files:
 
         st.dataframe(filtered_df)
 
-        # Mostrar totales si las columnas existen
-        if col_cierre and col_prom:
-            total_cierre = filtered_df[col_cierre].sum()
-            total_promocion = filtered_df[col_prom].sum()
-            st.markdown(f"### 💰 Total {col_cierre}: ${total_cierre:,.2f}")
-            st.markdown(f"### 💡 Total {col_prom}: ${total_promocion:,.2f}")
+        if "precio cierre" in filtered_df.columns:
+            total_cierre = filtered_df["precio cierre"].sum()
+            st.markdown(f"### 💰 Total Precio Cierre: ${total_cierre:,.2f}")
         else:
-            st.info("No se encontraron columnas de cierre o promoción para mostrar totales.")
+            st.info("No se encontró la columna 'Precio Cierre'.")
+
+        if "precio promocion" in filtered_df.columns:
+            total_promocion = filtered_df["precio promocion"].sum()
+            st.markdown(f"### 💡 Total Precio Promoción: ${total_promocion:,.2f}")
+        else:
+            st.info("No se encontró la columna 'Precio Promoción'.")

@@ -1,3 +1,3 @@
-# App Pro - Filtro 21 Online con totales tolerantes
+# App Robusta 21 Online
 
-Muestra los totales incluso si las columnas tienen nombres parecidos.
+Detecta encabezados automáticamente, limpia columnas y calcula totales correctamente.
