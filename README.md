@@ -1,3 +1,3 @@
-# App Completa 21 Online
+# Filtro 21 Online Final
 
-Incluye filtros por asesor captador/colocador, subtipo, fecha, búsqueda y totales.
+App con todos los filtros activos, correcciones aplicadas y carga funcional.
