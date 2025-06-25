@@ -60,16 +60,29 @@ if uploaded_files:
         with st.sidebar:
             st.header("Filtros")
 
-            if "asesor" in df.columns:
-                asesores = sorted(df["asesor"].dropna().unique())
-                asesor_sel = st.multiselect("👤 Asesor:", asesores, default=asesores)
-                df = df[df["asesor"].isin(asesor_sel)]
+            # Filtro por Asesor Captador o Colocador
+            asesores = []
+            if "asesor captador" in df.columns:
+                asesores += df["asesor captador"].dropna().unique().tolist()
+            if "asesor colocador" in df.columns:
+                asesores += df["asesor colocador"].dropna().unique().tolist()
+            asesores = sorted(set(asesores))
+            if asesores:
+                asesor_sel = st.multiselect("👤 Asesor (captador o colocador):", asesores, default=asesores)
+                mask = pd.Series(False, index=df.index)
+                if "asesor captador" in df.columns:
+                    mask = mask | df["asesor captador"].isin(asesor_sel)
+                if "asesor colocador" in df.columns:
+                    mask = mask | df["asesor colocador"].isin(asesor_sel)
+                df = df[mask]
 
+            # Filtro por subtipo
             if "subtipo de propiedad" in df.columns:
                 subtipos = sorted(df["subtipo de propiedad"].dropna().unique())
                 subtipo_sel = st.multiselect("🏠 Subtipo de Propiedad:", subtipos, default=subtipos)
                 df = df[df["subtipo de propiedad"].isin(subtipo_sel)]
 
+            # Filtro por fecha
             if "fecha cierre" in df.columns:
                 min_fecha = df["fecha cierre"].min()
                 max_fecha = df["fecha cierre"].max()
@@ -78,6 +91,7 @@ if uploaded_files:
                     df = df[(df["fecha cierre"] >= pd.to_datetime(fecha_sel[0])) & 
                             (df["fecha cierre"] <= pd.to_datetime(fecha_sel[1]))]
 
+            # Búsqueda
             search = st.text_input("🔎 Buscar palabra clave (dirección, código, cliente):").strip()
             if search:
                 search_cols = ["direccion", "codigo", "cliente"]

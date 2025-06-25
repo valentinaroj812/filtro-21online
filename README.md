@@ -1,3 +1,3 @@
 # App Completa 21 Online
 
-Filtros avanzados + totales funcionando correctamente.
+Incluye filtros por asesor captador/colocador, subtipo, fecha, búsqueda y totales.
