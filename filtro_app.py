@@ -36,8 +36,7 @@ def load_excel_with_header_guess(file):
         try:
             df = pd.read_excel(file, header=header_row)
             df = normalize_column_names(df)
-            if "precio cierre" in df.columns or "precio promocion" in df.columns:
-                return df
+            return df
         except:
             continue
     return pd.DataFrame()
@@ -55,31 +54,49 @@ if uploaded_files:
             df["precio promocion"] = df["precio promocion"].apply(clean_price)
         if "precio cierre" in df.columns:
             df["precio cierre"] = df["precio cierre"].apply(clean_price)
+        if "fecha cierre" in df.columns:
+            df["fecha cierre"] = pd.to_datetime(df["fecha cierre"], errors='coerce')
 
         with st.sidebar:
             st.header("Filtros")
+
+            if "asesor" in df.columns:
+                asesores = sorted(df["asesor"].dropna().unique())
+                asesor_sel = st.multiselect("👤 Asesor:", asesores, default=asesores)
+                df = df[df["asesor"].isin(asesor_sel)]
+
+            if "subtipo de propiedad" in df.columns:
+                subtipos = sorted(df["subtipo de propiedad"].dropna().unique())
+                subtipo_sel = st.multiselect("🏠 Subtipo de Propiedad:", subtipos, default=subtipos)
+                df = df[df["subtipo de propiedad"].isin(subtipo_sel)]
+
+            if "fecha cierre" in df.columns:
+                min_fecha = df["fecha cierre"].min()
+                max_fecha = df["fecha cierre"].max()
+                fecha_sel = st.date_input("📅 Rango de Fecha Cierre:", [min_fecha, max_fecha])
+                if len(fecha_sel) == 2:
+                    df = df[(df["fecha cierre"] >= pd.to_datetime(fecha_sel[0])) & 
+                            (df["fecha cierre"] <= pd.to_datetime(fecha_sel[1]))]
+
             search = st.text_input("🔎 Buscar palabra clave (dirección, código, cliente):").strip()
+            if search:
+                search_cols = ["direccion", "codigo", "cliente"]
+                mask = pd.Series(False, index=df.index)
+                for col in search_cols:
+                    if col in df.columns:
+                        mask = mask | df[col].astype(str).str.contains(search, case=False, na=False)
+                df = df[mask]
 
-        filtered_df = df.copy()
+        st.dataframe(df)
 
-        if search:
-            search_cols = ["direccion", "codigo", "cliente"]
-            mask = pd.Series(False, index=filtered_df.index)
-            for col in search_cols:
-                if col in filtered_df.columns:
-                    mask = mask | filtered_df[col].astype(str).str.contains(search, case=False, na=False)
-            filtered_df = filtered_df[mask]
-
-        st.dataframe(filtered_df)
-
-        if "precio cierre" in filtered_df.columns:
-            total_cierre = filtered_df["precio cierre"].sum()
+        if "precio cierre" in df.columns:
+            total_cierre = df["precio cierre"].sum()
             st.markdown(f"### 💰 Total Precio Cierre: ${total_cierre:,.2f}")
         else:
             st.info("No se encontró la columna 'Precio Cierre'.")
 
-        if "precio promocion" in filtered_df.columns:
-            total_promocion = filtered_df["precio promocion"].sum()
+        if "precio promocion" in df.columns:
+            total_promocion = df["precio promocion"].sum()
             st.markdown(f"### 💡 Total Precio Promoción: ${total_promocion:,.2f}")
         else:
             st.info("No se encontró la columna 'Precio Promoción'.")

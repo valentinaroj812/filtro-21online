@@ -1,3 +1,3 @@
-# App Robusta 21 Online
+# App Completa 21 Online
 
-Detecta encabezados automáticamente, limpia columnas y calcula totales correctamente.
+Filtros avanzados + totales funcionando correctamente.
