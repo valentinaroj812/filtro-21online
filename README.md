@@ -1,3 +1,3 @@
-# Filtro 21 Online con Totales
+# App Pro - Filtro 21 Online con totales tolerantes
 
-Incluye suma automática de Precio Cierre y Precio Promoción.
+Muestra los totales incluso si las columnas tienen nombres parecidos.

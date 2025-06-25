@@ -17,15 +17,22 @@ if code_input != ACCESS_CODE:
 def clean_price(x):
     if pd.isnull(x):
         return 0.0
-    return float(str(x).replace('$', '').replace(',', '').replace(' ', '').strip())
+    try:
+        return float(str(x).replace('$', '').replace(',', '').replace(' ', '').strip())
+    except:
+        return 0.0
+
+def find_column(columns, name_keywords):
+    for col in columns:
+        if any(keyword.lower() in col.lower() for keyword in name_keywords):
+            return col
+    return None
 
 def load_and_merge(files):
     dfs = []
     for file in files:
         try:
             df = pd.read_excel(file, header=0)
-            if "Fecha Cierre" not in df.columns:
-                df = pd.read_excel(file, header=1)
             dfs.append(df)
         except:
             st.error(f"⚠ No se pudo leer el archivo: {file.name}")
@@ -42,13 +49,12 @@ if uploaded_files:
     if df.empty:
         st.warning("⚠ No se pudo procesar ningún archivo válido.")
     else:
-        if "Precio Promoción" in df.columns:
-            df["Precio Promoción"] = df["Precio Promoción"].apply(clean_price)
-        if "Precio Cierre" in df.columns:
-            df["Precio Cierre"] = df["Precio Cierre"].apply(clean_price)
-        if "Fecha Cierre" in df.columns:
-            if not pd.api.types.is_datetime64_any_dtype(df["Fecha Cierre"]):
-                df["Fecha Cierre"] = pd.to_datetime(df["Fecha Cierre"], errors='coerce')
+        col_prom = find_column(df.columns, ["promocion"])
+        col_cierre = find_column(df.columns, ["cierre"])
+        if col_prom:
+            df[col_prom] = df[col_prom].apply(clean_price)
+        if col_cierre:
+            df[col_cierre] = df[col_cierre].apply(clean_price)
 
         with st.sidebar:
             st.header("Filtros avanzados")
@@ -67,8 +73,10 @@ if uploaded_files:
         st.dataframe(filtered_df)
 
         # Mostrar totales si las columnas existen
-        if "Precio Cierre" in filtered_df.columns and "Precio Promoción" in filtered_df.columns:
-            total_cierre = filtered_df["Precio Cierre"].sum()
-            total_promocion = filtered_df["Precio Promoción"].sum()
-            st.markdown(f"### 💰 Total Precio Cierre: ${total_cierre:,.2f}")
-            st.markdown(f"### 💡 Total Precio Promoción: ${total_promocion:,.2f}")
+        if col_cierre and col_prom:
+            total_cierre = filtered_df[col_cierre].sum()
+            total_promocion = filtered_df[col_prom].sum()
+            st.markdown(f"### 💰 Total {col_cierre}: ${total_cierre:,.2f}")
+            st.markdown(f"### 💡 Total {col_prom}: ${total_promocion:,.2f}")
+        else:
+            st.info("No se encontraron columnas de cierre o promoción para mostrar totales.")
