@@ -1,3 +1,3 @@
-# Filtro 21 Online Final
+# Filtro con Totales
 
-App con todos los filtros activos, correcciones aplicadas y carga funcional.
+Versión que muestra totales de Precio Cierre y Precio Promoción.
