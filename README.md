@@ -1,3 +1,3 @@
-# Filtro compatible
+# App FASE 1
 
-Compatible con múltiples estructuras de archivos Excel.
+Incluye exportación a Excel y gráficos por asesor y por mes.
