@@ -62,13 +62,18 @@ if uploaded_files:
             else: subtipo_sel = []
 
             
-    tipo_op_column = None
-    for col in df.columns:
-        if str(col).strip().lower() in ["tipo operación", "operacion", "tipo operacion", "tipo op", "operación"]:
-            tipo_op_column = col
-            break
-    if tipo_op_column:
-    
+tipo_op_column = None
+for col in df.columns:
+    if str(col).strip().lower() in ["tipo operación", "operacion", "tipo operacion", "tipo op", "operación"]:
+        tipo_op_column = col
+        break
+
+if tipo_op_column:
+    operaciones = df[tipo_op_column].dropna().unique()
+    tipo_op_sel = st.multiselect("🔀 Tipo de Operación", operaciones)
+else:
+    tipo_op_sel = []
+
                 operaciones = df["Tipo Operación"].dropna().unique()
                 tipo_op_sel = st.multiselect("🔀 Tipo de Operación", operaciones)
             else:

@@ -1,3 +1,3 @@
-# App con columna flexible para operación
+# Versión final corregida
 
-Detecta 'Tipo Operación', 'Operación', 'Tipo Op', etc.
+Incluye filtro flexible por tipo de operación, sin errores de indentación.
