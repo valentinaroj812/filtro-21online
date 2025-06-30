@@ -1,3 +1,3 @@
-# App completa con todos los filtros
+# App con columna flexible para operación
 
-Incluye exportación, gráficos y filtro por tipo de operación.
+Detecta 'Tipo Operación', 'Operación', 'Tipo Op', etc.
