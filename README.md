@@ -1,3 +1,5 @@
-# Versión funcional sin errores de indentación
+# Versión FINAL sin errores de indentación.
 
-Filtro de operación con nombres flexibles y sin errores.
+✅ Funcional
+✅ Flexible con columna 'Tipo Operación'
+✅ Exporta, filtra y grafica

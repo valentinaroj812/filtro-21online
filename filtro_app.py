@@ -6,8 +6,7 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide", page_title="21 Online App", page_icon="📊")
-st.markdown("<style>h1, h2, h3 {color: #B4975A;}</style>", unsafe_allow_html=True)
-st.title("📊 21 Online - Reportes con Exportación y Gráficos")
+st.title("📊 21 Online - Reportes con Filtros")
 
 ACCESS_CODE = "21ONLINE2024"
 code_input = st.sidebar.text_input("🔑 Código de acceso:", type="password")
@@ -31,7 +30,7 @@ def load_and_merge(files):
         except: pass
     return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
-uploaded_files = st.file_uploader("📂 Sube uno o más archivos Excel:", type=["xlsx"], accept_multiple_files=True)
+uploaded_files = st.file_uploader("📂 Sube archivos Excel:", type=["xlsx"], accept_multiple_files=True)
 if uploaded_files:
     df = load_and_merge(uploaded_files)
     if df.empty:
@@ -44,39 +43,35 @@ if uploaded_files:
             df["Fecha Cierre"] = pd.to_datetime(df["Fecha Cierre"], errors='coerce')
 
         with st.sidebar:
-            search = st.text_input("🔍 Buscar palabra clave:").strip()
+            search = st.text_input("🔍 Buscar palabra clave:")
             if "Fecha Cierre" in df.columns:
                 min_d, max_d = df["Fecha Cierre"].min().date(), df["Fecha Cierre"].max().date()
                 date_range = st.date_input("📅 Rango de fechas", value=(min_d, max_d))
-            else: date_range = None
+            else:
+                date_range = None
 
             asesores = []
             if "Asesor Captador" in df.columns or "Asesor Colocador" in df.columns:
                 asesores = pd.unique(df.get(["Asesor Captador", "Asesor Colocador"], pd.DataFrame()).values.ravel("K"))
                 asesores = [a for a in asesores if pd.notnull(a)]
                 asesor_sel = st.multiselect("👤 Asesores", options=asesores)
-            else: asesor_sel = []
+            else:
+                asesor_sel = []
 
             if "Subtipo de Propiedad" in df.columns:
                 subtipo_sel = st.multiselect("🏠 Subtipo", options=df["Subtipo de Propiedad"].dropna().unique())
-            else: subtipo_sel = []
+            else:
+                subtipo_sel = []
 
-            
-        # Filtro de tipo de operación con detección flexible
-        tipo_op_column = None
-        posibles_nombres = ["tipo operación", "operacion", "tipo operacion", "tipo op", "operación"]
-        for col in df.columns:
-            if str(col).strip().lower() in posibles_nombres:
-                tipo_op_column = col
-                break
+            tipo_op_column = None
+            posibles_nombres = ["tipo operación", "operacion", "tipo operacion", "tipo op", "operación"]
+            for col in df.columns:
+                if str(col).strip().lower() in posibles_nombres:
+                    tipo_op_column = col
+                    break
 
-        if tipo_op_column:
-            operaciones = df[tipo_op_column].dropna().unique()
-            tipo_op_sel = st.multiselect("🔀 Tipo de Operación", operaciones)
-        else:
-            tipo_op_sel = []
-
-                operaciones = df["Tipo Operación"].dropna().unique()
+            if tipo_op_column:
+                operaciones = df[tipo_op_column].dropna().unique()
                 tipo_op_sel = st.multiselect("🔀 Tipo de Operación", operaciones)
             else:
                 tipo_op_sel = []
@@ -95,12 +90,11 @@ if uploaded_files:
                 (filtered_df.get("Asesor Colocador", "").isin(asesor_sel))]
         if subtipo_sel:
             filtered_df = filtered_df[filtered_df["Subtipo de Propiedad"].isin(subtipo_sel)]
-        if tipo_op_sel:
+        if tipo_op_sel and tipo_op_column:
             filtered_df = filtered_df[filtered_df[tipo_op_column].isin(tipo_op_sel)]
 
         st.dataframe(filtered_df)
 
-        # Totales
         st.markdown("### Totales")
         col1, col2 = st.columns(2)
         if "Precio Promoción" in filtered_df.columns:
@@ -108,13 +102,11 @@ if uploaded_files:
         if "Precio Cierre" in filtered_df.columns:
             col2.metric("🔸 Total Cierre", f"${filtered_df['Precio Cierre'].sum():,.2f}")
 
-        # Exportar a Excel
         towrite = BytesIO()
         filtered_df.to_excel(towrite, index=False, engine="openpyxl")
         towrite.seek(0)
-        st.download_button("📥 Descargar Excel", towrite, file_name="reporte_21online.xlsx")
+        st.download_button("📥 Descargar Excel", towrite, file_name="reporte_filtrado.xlsx")
 
-        # Gráfico por asesor
         if "Asesor Captador" in filtered_df.columns:
             st.markdown("### 📊 Cierre por Asesor Captador")
             chart_data = filtered_df.groupby("Asesor Captador")["Precio Cierre"].sum().sort_values(ascending=False)
@@ -124,7 +116,6 @@ if uploaded_files:
             ax.set_title("Cierre por Asesor")
             st.pyplot(fig)
 
-        # Gráfico por mes
         if "Fecha Cierre" in filtered_df.columns:
             st.markdown("### 📈 Cierre por Mes")
             monthly = filtered_df.copy()
