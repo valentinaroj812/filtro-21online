@@ -61,6 +61,12 @@ if uploaded_files:
                 subtipo_sel = st.multiselect("🏠 Subtipo", options=df["Subtipo de Propiedad"].dropna().unique())
             else: subtipo_sel = []
 
+            if "Tipo Operación" in df.columns:
+                operaciones = df["Tipo Operación"].dropna().unique()
+                tipo_op_sel = st.multiselect("🔀 Tipo de Operación", operaciones)
+            else:
+                tipo_op_sel = []
+
         filtered_df = df.copy()
         if search:
             for col in ["Dirección", "Código", "Cliente"]:
@@ -75,6 +81,8 @@ if uploaded_files:
                 (filtered_df.get("Asesor Colocador", "").isin(asesor_sel))]
         if subtipo_sel:
             filtered_df = filtered_df[filtered_df["Subtipo de Propiedad"].isin(subtipo_sel)]
+        if tipo_op_sel:
+            filtered_df = filtered_df[filtered_df["Tipo Operación"].isin(tipo_op_sel)]
 
         st.dataframe(filtered_df)
 

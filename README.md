@@ -1,3 +1,3 @@
-# App FASE 1
+# App completa con todos los filtros
 
-Incluye exportación a Excel y gráficos por asesor y por mes.
+Incluye exportación, gráficos y filtro por tipo de operación.
