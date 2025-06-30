@@ -1,3 +1,3 @@
-# App final sin errores de indentación
+# Versión funcional sin errores de indentación
 
-Detecta nombres flexibles de operación y funciona sin errores.
+Filtro de operación con nombres flexibles y sin errores.
